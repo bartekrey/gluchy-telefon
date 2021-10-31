@@ -11,8 +11,7 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(express.static("./images"));
-//app.get("/images", express.static(path.join(__dirname, "./images")));
+app.use('/images', express.static(path.join(__dirname, 'images')))
 
 app.get('/drawing.html', (req, res) => {
   res.sendFile(path.join(__dirname, './drawing.html'));
