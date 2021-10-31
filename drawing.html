@@ -56,8 +56,30 @@ function preload() {
 }
 
 function Save () {
+  console.log("Inside save function")
+  var base64image = {'base64image' : canvas.toDataURL()};
+
+  fetch('http://localhost:3000/profile', {
+    method: 'POST', 
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(base64image)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Success:', data);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+
+
   saveCanvas(canvas, 'last_image', 'jpg');
   Clear();
+
+  const data = { username: 'example' };
+
 }
 
 function Clear () {
