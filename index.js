@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const httpServer = http.createServer(app);
+require('dotenv').config()
 
 
 const aws = require('aws-sdk');
@@ -31,8 +32,6 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
-
-
 
 const counter = require("./counter.json")
 var number_of_images = counter.counter;
@@ -88,7 +87,8 @@ const uploadImage = async (req, res, next, data) => {
     } else {
       console.log('successfully uploaded the image!');
 
-      counter.counter = number_of_images + 1
+      let counter = require("./counter.json")
+      counter.counter +=1
       fs.writeFileSync ("./counter.json", JSON.stringify(counter));
     }
   });
