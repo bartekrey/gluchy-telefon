@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- <link rel="stylesheet" href="./style.css"> -->
+  <title>Drawing Głuchy Telefon</title>
+
+</head>
+
+<body>
+  <div class="flex">
+    <h1>Głuchy telefon</h1>
+    <p>Zastanów się co chciała narysować osoba przed Tobą. Naciśnij "Dodaj nowy obrazek" i spróbuj narysować tę samą rzecz. Naciśnij "Zapisz", żeby dodać swój obrazek.
+      Naciśnij "Wyczyść", żeby narysować obrazek od nowa.
+    <div id="canvas"></div>
+    <div class="nav">
+      <div id="reset"></div>
+      <div id="nowy"></div>
+      <div id="save"></div>
+    </div>
+  </div>
+
+  <h2 class="wow">Zapisano!</div>
+
+    <!--  <script src="./drawing.js"></script> -->
+
+</body>
+
+</html>
+
+
+
+<script>
+  var liczba = "<%= liczba %>";
+  let numerek_ostatniego_obrazka = liczba;
+  var path = "https://gluchy-telefon.s3.eu-central-1.amazonaws.com/" + numerek_ostatniego_obrazka + ".png";
+  console.log(path);
+
+  function preload() {
+    last_image = loadImage(path)
+  }
+
+  let zablokuj = true;
+
+  function setup() {
+    colorMode(HSB);
+    let canvas = createCanvas(800, 600);
+    canvas.parent("canvas");
+    background(255);
+
+    image(last_image, 0, 0);
+
+    let reset = createButton('Wyczyść');
+    reset.parent("reset");
+    reset.mousePressed(Clear);
+    $("#reset").hide();
+
+    let nowy = createButton('Dodaj nowy obrazek');
+    nowy.parent("nowy");
+    nowy.mousePressed(Nowy);
+
+    let save = createButton('Zapisz');
+    save.parent("save");
+    save.mousePressed(Save);
+    $("#save").hide();
+
+  }
+
+  function Nowy() {
+    clear();
+    background(255);
+    $("#nowy").hide();
+    $("#save").show();
+    $("#reset").show();
+    zablokuj = false;
+  }
+
+  function Clear() {
+    clear();
+    background(255);
+  }
+
+  function Save() {
+
+
+        console.log("Inside save function")
+        var base64image = {
+          'base64image': canvas.toDataURL()
+        };
+
+        fetch('http://localhost:3000/profile', {
+            method: 'POST',
+            headers: {
+              "Content-Type": 'application/json',
+            },
+            body: JSON.stringify(base64image)
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+
+
+
+/*
+    function dataURItoBlob(dataURI) {
+      var binary = atob(dataURI.split(',')[1]);
+      var array = [];
+      for (var i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+      }
+      return new Blob([new Uint8Array(array)], {
+        type: 'image/jpeg'
+      });
+    }
+
+    var dataUrl = canvas.toDataURL("image/jpeg");
+    var blobData = dataURItoBlob(dataUrl);
+    console.log(blobData);
+
+    fetch('http://localhost:3000/profile', {
+        method: 'POST',
+        headers: {
+          "Bucket": 'gluchy-telefon',
+          "Key": liczba + ".png",
+          "Content-Type": "image/jpeg",
+          "ACL": 'public-read',
+        },
+        body: blobData
+      }).then(data => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+*/
+
+
+    $(".wow").show();
+    $(".wow").fadeOut(2000);
+
+    $("#save").hide();
+    $("#reset").hide();
+    $("#nowy").show();
+    zablokuj = true;
+  }
+
+
+
+
+
+  let hue = 0;
+
+  function draw() {
+    if (zablokuj != true) {
+      colorMode(HSB);
+      strokeWeight(3);
+      stroke(hue, 100, 100);
+      fill(hue, 100, 100);
+      if (mouseIsPressed === true) {
+        line(mouseX, mouseY, pmouseX, pmouseY);
+        hue = hue + 2;
+      }
+      if (hue === 360) {
+        hue = 0;
+      }
+    }
+  }
+</script>
+
+<style>
+  body {
+    background-color: #EEEEEE;
+    font-family: sans-serif;
+    color: #000000;
+  }
+
+  .flex {
+    display: flex;
+    flex-flow: column nowrap;
+
+    align-items: center;
+    justify-content: center;
+  }
+
+  p {
+    font-size: 1em;
+    width: 800px;
+  }
+
+  h1 {
+    font-size: 6em;
+    display: block;
+    margin: 0 auto;
+  }
+
+  button,
+  input {
+    font-family: sans-serif;
+    font-size: 1em;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    margin: 0 2em;
+
+  }
+
+  label {
+    color: #000000;
+    font-weight: bold;
+  }
+
+  .wow {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    font-size: 98px;
+    margin-top: -59px;
+    margin-left: -274px;
+  }
+
+  .nav {
+    width: 800px;
+    display: flex;
+    flex-flow: row nowrap;
+
+    justify-content: center;
+    align-items: center;
+  }
+</style>
